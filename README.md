@@ -20,6 +20,17 @@ npm i -g @nestjs/cli
 ```
 docker-compose up -d
 ```
+5. Clonar archivo __.env.template__ a uno __.env__ y añadir variables de entorno personales
+6. Correr app en desarrollo
+```
+yarn start:dev
+```
+7. En caso de requerir nueva data de pokemon.
+  - __Esta ruta elimina toda data existente en pokemon schema__
+  - __Ejecutar ruta solo en caso de requerir data de testing__.
+```
+Get http://localhost:3000/api/seed
+```
 
 ## Stack
 * MongoDB

@@ -6,17 +6,25 @@ import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPokemon } from './interfaces/pokemon.interface';
 import { CatchDatabaseErrors } from 'src/common/decorators/catch-database-errors.decorator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PokemonService {
 
+  private defaultSkip = this.configService.get('skip');
+  private defaultLimit = this.configService.get('limit');
+
   constructor(
     @InjectModel( Pokemon.name )
-    private readonly pokemonModel: Model<Pokemon>
+    private readonly pokemonModel: Model<Pokemon>,
+    private readonly configService: ConfigService,
   ){}
 
   @CatchDatabaseErrors()
-  async create({name, no}: CreatePokemonDto): Promise<IPokemon> {
+  async create(
+    {name, no}: CreatePokemonDto
+  ): Promise<IPokemon> {
     const pokemon: IPokemon = await this.pokemonModel.create({
       name: name.toLowerCase().trim(),
       no,
@@ -25,8 +33,11 @@ export class PokemonService {
   }
 
   @CatchDatabaseErrors()
-  async findAll(): Promise<IPokemon[]> {
-    const pokemons = await this.pokemonModel.find();
+  async findAll(
+    { skip = this.defaultSkip , limit = this.defaultLimit }: PaginationDto
+  ): Promise<IPokemon[]> {
+    const pokemons = await this.pokemonModel.find()
+      .skip( skip ).limit( limit ).sort({ no: 1 });
     return pokemons;
   }
 

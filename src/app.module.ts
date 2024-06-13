@@ -8,21 +8,37 @@ import { ValidationExceptionFilter } from './common/filters/validation-exception
 import { DatabaseExceptionFilter } from './common/filters/database-exception.filter';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { CommonModule } from './common/common.module';
+import { SeedModule } from './seed/seed.module';
+import { ConfigModule } from '@nestjs/config';
+import { EnvConfiguration } from './common/config/app.config';
+import { JoiValidationSchema } from './common/config/joi.validation';
 
 @Module({
   imports: [
-  ServeStaticModule.forRoot({
-    rootPath: join(__dirname,'..','public'),
-  }),
 
-  // MongoDB connection and db
-  MongooseModule.forRoot('mongodb://localhost:27017/nest-pokemon'),
+    // Env Config
+    ConfigModule.forRoot({
+      load: [ EnvConfiguration ],
+      validationSchema: JoiValidationSchema
+    }),
 
-  PokemonModule,
+    // Public folder
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname,'..','public'),
+    }),
 
-  CommonModule,
+    // MongoDB connection and db
+    MongooseModule.forRoot(process.env.MONGODB, {
+      dbName: 'learning-nestjs'
+    }),
+
+    PokemonModule,
+
+    CommonModule,
+
+    SeedModule,
   ],
-   providers: [
+   providers: [  // Filters
     {
       provide: APP_FILTER,
       useClass: ValidationExceptionFilter,
